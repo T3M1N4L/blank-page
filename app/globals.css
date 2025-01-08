@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -71,7 +71,139 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-black text-white overflow-y-scroll;
   }
 }
 
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-zinc-900::-webkit-scrollbar-thumb {
+    background-color: rgb(24 24 27);
+    border-radius: 9999px;
+  }
+  
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(24 24 27);
+    border-radius: 9999px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+/* Override highlight.js theme */
+.hljs {
+  background: black !important;
+  color: #c9d1d9 !important;
+}
+
+/* Preserve syntax highlighting colors */
+.hljs-keyword { color: #ff7b72 !important; }
+.hljs-string { color: #a5d6ff !important; }
+.hljs-number { color: #79c0ff !important; }
+.hljs-function { color: #d2a8ff !important; }
+.hljs-title { color: #d2a8ff !important; }
+.hljs-params { color: #ffa657 !important; }
+.hljs-comment { color: #8b949e !important; }
+.hljs-built_in { color: #ffa657 !important; }
+.hljs-literal { color: #79c0ff !important; }
+.hljs-variable { color: #ffa657 !important; }
+.hljs-operator { color: #ff7b72 !important; }
+
+/* Dropdown animations */
+@keyframes enterMenu {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes exitMenu {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+}
+
+[data-state="open"] > [role="menu"] {
+  animation: enterMenu 0.2s ease-out;
+}
+
+[data-state="closed"] > [role="menu"] {
+  animation: exitMenu 0.2s ease-out;
+}
+
+/* Dropdown item hover effects */
+[role="menuitem"] {
+  @apply transition-colors duration-150;
+}
+
+[role="menuitem"]:hover {
+  @apply bg-accent text-accent-foreground;
+}
+
+[role="menuitem"].destructive {
+  @apply text-destructive;
+}
+
+[role="menuitem"].destructive:hover {
+  @apply bg-destructive/10 text-destructive;
+}
+
+/* Remove focus outline */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Input styles */
+.input-transparent {
+  @apply h-9 bg-transparent border-0 ring-offset-0 focus-visible:ring-0 rounded-md px-3;
+  @apply placeholder:text-muted-foreground;
+  @apply transition-all duration-200;
+}
+
+.input-transparent:hover {
+  @apply bg-accent/50;
+}
+
+.input-transparent:focus {
+  @apply bg-accent/50;
+}
+
+/* Button and input hover effects */
+button[class*="hover\\:bg-accent"],
+input[class*="hover\\:bg-accent"] {
+  @apply transition-colors duration-150;
+}
+
+button[class*="hover\\:bg-accent"]:hover,
+input[class*="hover\\:bg-accent"]:hover {
+  @apply bg-accent text-accent-foreground;
+}
+
+button[class*="hover\\:bg-accent\\/50"]:hover,
+input[class*="hover\\:bg-accent\\/50"]:hover {
+  @apply bg-accent/50;
+}

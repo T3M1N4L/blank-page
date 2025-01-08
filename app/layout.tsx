@@ -1,11 +1,12 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { FileText } from 'lucide-react'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Markdown Notes App',
-  description: 'A simple markdown notes app',
+  title: 'Scribbled Page',
+  description: 'A modern note-taking app',
 }
 
 export default function RootLayout({
@@ -15,7 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
+      <body className={inter.className}>
+        {children}
+      </body>
     </html>
   )
 }

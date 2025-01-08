@@ -6,9 +6,11 @@ import Editor from './components/Editor'
 import { ThemeProvider } from './components/theme-provider'
 
 export default function Home() {
-  const [notes, setNotes] = useState<{ id: string; title: string; content: string }[]>([])
-  const [currentNote, setCurrentNote] = useState<{ id: string; title: string; content: string } | null>(null)
+  const [notes, setNotes] = useState<{ id: string; title: string; content: string; isRendered: boolean }[]>([])
+  const [currentNote, setCurrentNote] = useState<{ id: string; title: string; content: string; isRendered: boolean } | null>(null)
   const [showNavbar, setShowNavbar] = useState(true)
+  const [isRendered, setIsRendered] = useState(false)
+  const [isSplitScreen, setIsSplitScreen] = useState(false)
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('notes')
@@ -21,6 +23,7 @@ export default function Home() {
         const lastNote = parsedNotes.find((note: { id: string }) => note.id === lastEditedNoteId)
         if (lastNote) {
           setCurrentNote(lastNote)
+          setIsRendered(lastNote.isRendered)
         } else {
           setCurrentNote(parsedNotes[0])
         }
@@ -32,12 +35,12 @@ export default function Home() {
         id: Date.now().toString(),
         title: 'Untitled Note',
         content: '',
+        isRendered: false,
       }
       setNotes([initialNote])
       setCurrentNote(initialNote)
     }
 
-    // Hide navbar when typing
     let timeout: NodeJS.Timeout
     const handleMouseMove = () => {
       setShowNavbar(true)
@@ -60,6 +63,7 @@ export default function Home() {
       id: Date.now().toString(),
       title: 'Untitled Note',
       content: '',
+      isRendered: false,
     }
     setNotes([...notes, newNote])
     setCurrentNote(newNote)
@@ -73,21 +77,70 @@ export default function Home() {
     }
   }
 
+  const updateNoteTitle = (title: string) => {
+    if (currentNote) {
+      const updatedNote = { ...currentNote, title }
+      setCurrentNote(updatedNote)
+      setNotes(notes.map(note => note.id === currentNote.id ? updatedNote : note))
+    }
+  }
+
+  const toggleRendering = () => {
+    if (currentNote) {
+      const updatedNote = { ...currentNote, isRendered: !currentNote.isRendered }
+      setCurrentNote(updatedNote)
+      setNotes(notes.map(note => note.id === currentNote.id ? updatedNote : note))
+      setIsRendered(!isRendered)
+    }
+  }
+
+  const toggleSplitScreen = () => {
+    setIsSplitScreen(!isSplitScreen)
+  }
+
+  const deleteNote = (id: string) => {
+    const updatedNotes = notes.filter(note => note.id !== id)
+    setNotes(updatedNotes)
+    if (currentNote && currentNote.id === id) {
+      setCurrentNote(updatedNotes[0] || null)
+    }
+  }
+
+  const renameNote = (id: string, newTitle: string) => {
+    const updatedNotes = notes.map(note => 
+      note.id === id ? { ...note, title: newTitle } : note
+    )
+    setNotes(updatedNotes)
+    if (currentNote && currentNote.id === id) {
+      setCurrentNote({ ...currentNote, title: newTitle })
+    }
+  }
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
-      <div className="min-h-screen bg-black text-white">
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <div className="min-h-screen bg-background text-foreground">
         <Navbar
           notes={notes}
           currentNote={currentNote}
           setCurrentNote={setCurrentNote}
           createNewNote={createNewNote}
           show={showNavbar}
+          isRendered={isRendered}
+          toggleRendering={toggleRendering}
+          updateNoteTitle={updateNoteTitle}
+          deleteNote={deleteNote}
+          renameNote={renameNote}
+          toggleSplitScreen={toggleSplitScreen}
+          isSplitScreen={isSplitScreen}
         />
         <main className="container mx-auto px-4 py-8">
           {currentNote && (
             <Editor
+              key={currentNote.id}
               content={currentNote.content}
               updateContent={updateCurrentNote}
+              isRendered={isRendered}
+              isSplitScreen={isSplitScreen}
             />
           )}
         </main>
