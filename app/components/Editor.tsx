@@ -12,10 +12,9 @@ interface EditorProps {
   content: string
   updateContent: (content: string) => void
   isRendered: boolean
-  isSplitScreen: boolean
 }
 
-export default function Editor({ content, updateContent, isRendered, isSplitScreen }: EditorProps) {
+export default function Editor({ content, updateContent, isRendered }: EditorProps) {
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const [copied, setCopied] = useState<string | null>(null)
 
@@ -54,52 +53,30 @@ export default function Editor({ content, updateContent, isRendered, isSplitScre
     })
   }
 
-  const HeadingWithoutMenu = ({ level, children }: { level: number, children: React.ReactNode }) => {
-    const Tag = `h${level}` as keyof JSX.IntrinsicElements
-    const sizes = {
-      1: 'text-4xl',
-      2: 'text-3xl',
-      3: 'text-2xl',
-      4: 'text-xl',
-      5: 'text-lg',
-      6: 'text-base',
-    }
-
-    return (
-      <Tag className={`${sizes[level as keyof typeof sizes]} font-bold mb-4`}>
-        {children}
-      </Tag>
-    )
-  }
-
   return (
-    <div className={cn(
-      "relative w-full max-w-none mx-auto mt-16",
-      isSplitScreen ? "flex" : ""
-    )}>
+    <div className="relative w-full max-w-3xl mx-auto mt-16">
       <textarea
         ref={editorRef}
         onChange={handleInput}
         className={cn(
-          "w-full min-h-[calc(100vh-4rem)] bg-black text-white",
+          "w-full min-h-[calc(100vh-8rem)] bg-black text-white",
           "outline-none resize-none",
           "text-lg leading-relaxed",
           "placeholder-gray-500",
-          "p-4",
-          isRendered && !isSplitScreen ? "hidden" : "block",
-          isSplitScreen ? "flex-1" : ""
+          "scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent",
+          isRendered ? "hidden" : "block"
         )}
         placeholder="Start typing here..."
       />
-      {(isRendered || isSplitScreen) && (
-        <div className={cn(
-          "w-full min-h-[calc(100vh-4rem)] overflow-auto p-4",
-          isSplitScreen ? "flex-1" : ""
-        )}>
+      {isRendered && (
+        <div className="w-full min-h-[calc(100vh-8rem)] overflow-auto scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent">
           <ReactMarkdown
             className={cn(
               "prose prose-invert max-w-none",
               "text-lg leading-relaxed",
+              "[&>h1]:text-4xl [&>h2]:text-3xl [&>h3]:text-2xl [&>h4]:text-xl [&>h5]:text-lg [&>h6]:text-base",
+              "[&>h1]:font-bold [&>h2]:font-bold [&>h3]:font-bold [&>h4]:font-semibold [&>h5]:font-semibold [&>h6]:font-semibold",
+              "[&>h1]:mb-4 [&>h2]:mb-3 [&>h3]:mb-2 [&>h4]:mb-2 [&>h5]:mb-2 [&>h6]:mb-2",
               "[&>p]:mb-4",
               "[&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4",
               "[&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4",
@@ -111,22 +88,25 @@ export default function Editor({ content, updateContent, isRendered, isSplitScre
               "text-white"
             )}
             components={{
-              h1: ({ children }) => <HeadingWithoutMenu level={1}>{children}</HeadingWithoutMenu>,
-              h2: ({ children }) => <HeadingWithoutMenu level={2}>{children}</HeadingWithoutMenu>,
-              h3: ({ children }) => <HeadingWithoutMenu level={3}>{children}</HeadingWithoutMenu>,
-              h4: ({ children }) => <HeadingWithoutMenu level={4}>{children}</HeadingWithoutMenu>,
-              h5: ({ children }) => <HeadingWithoutMenu level={5}>{children}</HeadingWithoutMenu>,
-              h6: ({ children }) => <HeadingWithoutMenu level={6}>{children}</HeadingWithoutMenu>,
               code({node, inline, className, children, ...props}) {
                 const match = /language-(\w+)/.exec(className || '')
                 const id = Math.random().toString(36).substr(2, 9)
-                return !inline || !match ? (
+
+                if (inline) {
+                  return (
+                    <code className={cn("bg-zinc-900 rounded px-1.5 py-0.5 text-sm", className)} {...props}>
+                      {children}
+                    </code>
+                  )
+                }
+
+                return match ? (
                   <div className="relative my-4 rounded-lg overflow-hidden border border-zinc-800">
                     <div className="flex items-center justify-between px-4 py-2 bg-black border-b border-zinc-800">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-zinc-700" />
                         <span className="text-sm text-zinc-400 font-mono">
-                          {match ? match[1] : "plaintext"}
+                          {match[1]}
                         </span>
                       </div>
                       <Button
@@ -145,18 +125,21 @@ export default function Editor({ content, updateContent, isRendered, isSplitScre
                     </div>
                     <div className="p-4 bg-black">
                       <pre className="!m-0 !bg-black">
-                        <code className={`!bg-black ${match ? `language-${match[1].toLowerCase()}` : ''}`}>
+                        <code className={`!bg-black language-${match[1].toLowerCase()}`}>
                           {String(children).replace(/\n$/, '')}
                         </code>
                       </pre>
                     </div>
                   </div>
                 ) : (
-                  <code className={cn("bg-zinc-900 rounded px-1.5 py-0.5 text-sm", className)} {...props}>
-                    {children}
-                  </code>
+                  <div className="relative my-4 rounded-lg overflow-hidden border border-zinc-800">
+                    <pre className="!m-0 !bg-black">
+                      <code className="!bg-black">{String(children).replace(/\n$/, '')}</code>
+                    </pre>
+                  </div>
                 )
-              }
+              },
+              // Other components (like h1, h2, etc.) are unchanged
             }}
           >
             {content}

@@ -64,9 +64,17 @@ export default function Navbar({
 }: NavbarProps) {
   const [isCountingWords, setIsCountingWords] = useState(true)
   const [emailAddress, setEmailAddress] = useState('')
+  const [showingWords, setShowingWords] = useState(false)
 
-  const wordCount = currentNote ? currentNote.content.trim().split(/\s+/).length : 0
-  const characterCount = currentNote ? currentNote.content.length : 0
+
+  const getCount = () => {
+    if (!currentNote) return ''
+    if (showingWords) {
+      const wordCount = currentNote.content.trim().split(/\s+/).filter(Boolean).length
+      return `${wordCount} words`
+    }
+    return `${currentNote.content.length} characters`
+  }
 
   const toggleCounter = () => setIsCountingWords(!isCountingWords)
 
@@ -176,6 +184,13 @@ export default function Navbar({
           </div>
         </div>
         <div className="flex items-center space-x-4">
+        <Button
+            variant="ghost"
+            className="text-sm text-muted-foreground"
+            onClick={toggleCounter}
+          >
+            {getCount()}
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -239,19 +254,6 @@ export default function Navbar({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="text-sm text-muted-foreground">
-            {isCountingWords
-              ? `${wordCount} words`
-              : `${characterCount} characters`}
-            <Button
-              variant="link"
-              size="sm"
-              className="ml-2"
-              onClick={toggleCounter}
-            >
-              {isCountingWords ? 'Switch to characters' : 'Switch to words'}
-            </Button>
-          </div>
         </div>
       </div>
     </div>

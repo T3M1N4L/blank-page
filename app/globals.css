@@ -207,3 +207,4 @@ button[class*="hover\\:bg-accent\\/50"]:hover,
 input[class*="hover\\:bg-accent\\/50"]:hover {
   @apply bg-accent/50;
 }
+
